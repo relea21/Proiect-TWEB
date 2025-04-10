@@ -2,6 +2,8 @@ package com.mobylab.springbackend.config.security;
 
 import com.mobylab.springbackend.entity.Role;
 import com.mobylab.springbackend.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,8 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        logger.info("load user from token");
         Optional<com.mobylab.springbackend.entity.User> optionalUser = userRepository.findUserByEmail(email);
         if (optionalUser.isPresent()) {
             com.mobylab.springbackend.entity.User user = optionalUser.get();

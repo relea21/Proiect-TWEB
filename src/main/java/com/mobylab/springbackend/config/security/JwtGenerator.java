@@ -3,6 +3,8 @@ package com.mobylab.springbackend.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ public class JwtGenerator {
     @Value("${token.ttl}")
     private long JWT_EXPIRY;
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtGenerator.class);
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
@@ -52,6 +55,7 @@ public class JwtGenerator {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token);
+            logger.info("JWT Token Validated");
             return true;
         } catch (Exception ex) {
             throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect");
