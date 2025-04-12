@@ -1,0 +1,36 @@
+package com.mobylab.springbackend.service;
+
+import com.mobylab.springbackend.entity.Category;
+import com.mobylab.springbackend.exception.BadRequestException;
+import com.mobylab.springbackend.repository.CategoryRepository;
+import com.mobylab.springbackend.service.dto.CategoryDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CategoryService {
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
+    public Category addCategory(CategoryDto addedCategory) {
+        if (addedCategory == null) {
+            throw new BadRequestException("Category is null");
+        }
+
+        Category alreadyExists = categoryRepository.findByName(addedCategory.getName());
+
+        if (alreadyExists != null) {
+            throw new BadRequestException("Category with name '" + addedCategory.getName() + "' already exists.");
+        }
+
+        Category category = new Category();
+        category.setName(addedCategory.getName());
+        categoryRepository.save(category);
+
+        logger.info("Category '{}' added successfully", addedCategory.getName());
+        return category;
+    }
+}
