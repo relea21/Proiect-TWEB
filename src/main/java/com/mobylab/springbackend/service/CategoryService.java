@@ -9,12 +9,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
+
     public Category addCategory(CategoryDto addedCategory) {
         if (addedCategory == null) {
             throw new BadRequestException("Category is null");
@@ -32,5 +35,17 @@ public class CategoryService {
 
         logger.info("Category '{}' added successfully", addedCategory.getName());
         return category;
+    }
+
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    public void deleteCategory(String name) {
+        Category category = categoryRepository.findByName(name);
+        if (category == null) {
+            throw new BadRequestException("Category with name '" + name + "' does not exist.");
+        }
+        categoryRepository.delete(category);
     }
 }

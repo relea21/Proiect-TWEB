@@ -1,5 +1,6 @@
 package com.mobylab.springbackend.controller;
 
+import com.mobylab.springbackend.exception.BadRequestException;
 import com.mobylab.springbackend.service.AuthService;
 import com.mobylab.springbackend.service.dto.LoginDto;
 import com.mobylab.springbackend.service.dto.LoginResponseDto;
@@ -33,7 +34,11 @@ public class AuthController {
     @RequestMapping(path ="/register", method = RequestMethod.POST)
     public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
         logger.info("Request to register user {}", registerDto.getEmail());
-        authService.register(registerDto);
+        try {
+            authService.register(registerDto);
+        } catch (BadRequestException e) {
+            logger.error(e.getMessage());
+        }
         logger.info("Successfully registered user {}", registerDto.getEmail());
         return new ResponseEntity<>("User registered", HttpStatus.CREATED);
     }
@@ -41,9 +46,14 @@ public class AuthController {
     @RequestMapping(path ="/login", method = RequestMethod.POST)
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         logger.info("Request to login for user {}", loginDto.getEmail());
-        String token = authService.login(loginDto);
-        logger.info("Successfully logged in user {}", loginDto.getEmail());
-        return new ResponseEntity<>(loginResponseDto.setToken(token), HttpStatus.OK);
+        try {
+            String token = authService.login(loginDto);
+            logger.info("Successfully logged in user {}", loginDto.getEmail());
+            return new ResponseEntity<>(loginResponseDto.setToken(token), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(loginResponseDto, HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @SecurityRequirement(name = "bearerAuth")
