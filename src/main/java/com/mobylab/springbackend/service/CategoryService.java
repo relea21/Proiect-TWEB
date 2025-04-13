@@ -3,6 +3,7 @@ package com.mobylab.springbackend.service;
 import com.mobylab.springbackend.entity.Category;
 import com.mobylab.springbackend.exception.BadRequestException;
 import com.mobylab.springbackend.repository.CategoryRepository;
+import com.mobylab.springbackend.repository.ProductRepository;
 import com.mobylab.springbackend.service.dto.CategoryDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -17,6 +18,9 @@ import java.util.List;
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
@@ -48,6 +52,13 @@ public class CategoryService {
         if (category == null) {
             throw new BadRequestException("Category with name '" + name + "' does not exist.");
         }
+
+        category.getProducts().forEach(product -> {
+            product.setUser(null);
+            product.setCategory(null);
+            productRepository.delete(product);
+        });
+        category.getProducts().clear();
         categoryRepository.delete(category);
     }
 }
