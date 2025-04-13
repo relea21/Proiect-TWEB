@@ -4,6 +4,7 @@ import com.mobylab.springbackend.entity.Category;
 import com.mobylab.springbackend.exception.BadRequestException;
 import com.mobylab.springbackend.repository.CategoryRepository;
 import com.mobylab.springbackend.service.dto.CategoryDto;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;

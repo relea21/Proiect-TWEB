@@ -18,8 +18,13 @@ public class Category {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Product> products = new ArrayList<>();
+
+    public void addProduct(Product product) {
+        products.add(product);
+        product.setCategory(this);
+    }
 
     public String getName() {
         return name;

@@ -23,6 +23,10 @@ public class Product {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "users_id", referencedColumnName = "id")
+    private User user;
+
     public UUID getId() {
         return id;
     }
@@ -47,7 +51,7 @@ public class Product {
         this.description = description;
     }
 
-    public double getStartingPrice() {
+    public Integer getStartingPrice() {
         return startingPrice;
     }
 
@@ -61,5 +65,13 @@ public class Product {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

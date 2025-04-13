@@ -12,12 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/home/categories")
-public class CategoryController {
+public class CategoryController implements SecuredRestController{
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
 
@@ -26,7 +27,7 @@ public class CategoryController {
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
-    @SecurityRequirement(name = "bearerAuth")
+
     @RequestMapping(method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody CategoryDto addedCategory) {
@@ -40,7 +41,6 @@ public class CategoryController {
         }
     }
 
-    @SecurityRequirement(name = "bearerAuth")
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getAllCategories() {
         logger.info("Request to get all categories");
@@ -48,7 +48,6 @@ public class CategoryController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @SecurityRequirement(name = "bearerAuth")
     @RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteCategory(@PathVariable String name) {

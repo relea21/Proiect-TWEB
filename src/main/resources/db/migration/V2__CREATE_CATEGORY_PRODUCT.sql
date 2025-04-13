@@ -13,6 +13,7 @@ CREATE TABLE project.product (
     description text,
     starting_price integer,
     category_id INTEGER REFERENCES project.category(id),
+    users_id UUID REFERENCES project.users(id),
 
     PRIMARY KEY (id)
 );
