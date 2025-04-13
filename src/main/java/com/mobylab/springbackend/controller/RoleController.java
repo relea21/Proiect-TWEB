@@ -1,5 +1,6 @@
 package com.mobylab.springbackend.controller;
 
+import com.mobylab.springbackend.exception.BadRequestException;
 import com.mobylab.springbackend.service.RoleService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
@@ -29,8 +30,13 @@ public class RoleController implements SecuredRestController{
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> addRoles(@RequestBody List<String> roleList) {
         logger.info("Request to add roles {}", roleList);
-        List<String> addedRoles = roleService.addRoles(roleList);
-        logger.info("Successfully added roles {}", addedRoles);
-        return new ResponseEntity<>(addedRoles, HttpStatus.CREATED);
+        try {
+            List<String> addedRoles = roleService.addRoles(roleList);
+            logger.info("Successfully added roles {}", addedRoles);
+            return new ResponseEntity<>(addedRoles, HttpStatus.CREATED);
+        } catch (BadRequestException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 }
