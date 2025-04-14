@@ -2,6 +2,8 @@ package com.mobylab.springbackend.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,6 +28,14 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "users_id", referencedColumnName = "id")
     private User user;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
+    private List<Bid> bidList = new ArrayList<Bid>();
+
+    public void addBid(Bid bid) {
+        bidList.add(bid);
+        bid.setProduct(this);
+    }
 
     public UUID getId() {
         return id;
@@ -73,5 +83,13 @@ public class Product {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<Bid> getBidList() {
+        return bidList;
+    }
+
+    public void setBidList(List<Bid> bidList) {
+        this.bidList = bidList;
     }
 }

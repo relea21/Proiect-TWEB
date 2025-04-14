@@ -1,7 +1,10 @@
 package com.mobylab.springbackend.service;
 
+import com.mobylab.springbackend.entity.Bid;
 import com.mobylab.springbackend.entity.Category;
+import com.mobylab.springbackend.entity.Product;
 import com.mobylab.springbackend.exception.BadRequestException;
+import com.mobylab.springbackend.repository.BidRepository;
 import com.mobylab.springbackend.repository.CategoryRepository;
 import com.mobylab.springbackend.repository.ProductRepository;
 import com.mobylab.springbackend.service.dto.CategoryDto;
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,6 +25,9 @@ public class CategoryService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private BidRepository bidRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
 
@@ -53,12 +60,24 @@ public class CategoryService {
             throw new BadRequestException("Category with name '" + name + "' does not exist.");
         }
 
-        category.getProducts().forEach(product -> {
-            product.setUser(null);
-            product.setCategory(null);
-            productRepository.delete(product);
-        });
-        category.getProducts().clear();
+        List<Product> products = new ArrayList<>(category.getProducts());
+
+        for (Product p : products) {
+            List<Bid> bidsToDelete= new ArrayList<>(p.getBidList());
+            for (Bid b : bidsToDelete) {
+                b.setProduct(null);
+                bidRepository.delete(b);
+            }
+            bidRepository.flush();
+            p.getBidList().clear();
+            p.getUser().getProductsList().remove(p);
+            p.getCategory().getProducts().remove(p);
+            p.setCategory(null);
+            p.setUser(null);
+            productRepository.delete(p);
+            productRepository.flush();
+        }
         categoryRepository.delete(category);
+        categoryRepository.flush();
     }
 }

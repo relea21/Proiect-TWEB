@@ -1,8 +1,10 @@
 package com.mobylab.springbackend.service;
 
+import com.mobylab.springbackend.entity.Bid;
 import com.mobylab.springbackend.entity.Category;
 import com.mobylab.springbackend.entity.User;
 import com.mobylab.springbackend.exception.BadRequestException;
+import com.mobylab.springbackend.repository.BidRepository;
 import com.mobylab.springbackend.repository.CategoryRepository;
 import com.mobylab.springbackend.repository.UserRepository;
 import com.mobylab.springbackend.service.dto.CategoryDto;
@@ -16,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,15 +28,18 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final BidRepository bidRepository;
     private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     public ProductService(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            BidRepository bidRepository) {
         this.productRepository = productRepository;
         this.categoryRepository  = categoryRepository;
         this.userRepository = userRepository;
+        this.bidRepository = bidRepository;
     }
 
     public List<ProductDto> findByCategory(String categoryName) {
@@ -75,11 +81,25 @@ public class ProductService {
 
         logger.info("Deleting product " + product.getName() + " " + product.getDescription() + " " + product.getStartingPrice());
 
-        category.getProducts().remove(product);
-        product.getUser().getProductsList().remove(product);
-        product.setCategory(null);
-        product.setUser(null);
+        List<Bid> bidsToDelete = new ArrayList<>(product.getBidList());
+        for (Bid b : bidsToDelete) {
+            b.setProduct(null);
+            bidRepository.delete(b);
+        }
+        bidRepository.flush();
+        product.getBidList().clear();
+
+        if (product.getUser() != null) {
+            product.getUser().getProductsList().remove(product);
+            product.setUser(null);
+        }
+        if (product.getCategory() != null) {
+            product.getCategory().getProducts().remove(product);
+            product.setCategory(null);
+        }
+
         productRepository.delete(product);
+        productRepository.flush();
     }
 
     public ProductDto getProduct(String productName, String categoryName) {

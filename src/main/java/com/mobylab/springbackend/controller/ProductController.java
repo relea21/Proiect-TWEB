@@ -82,6 +82,4 @@ public class ProductController implements SecuredRestController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
-
 }
